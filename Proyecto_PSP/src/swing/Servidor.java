@@ -4,17 +4,40 @@
  */
 package swing;
 
+import clases.HiloServidor;
+import scrollbar.ScrollBarCustom;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+
 /**
  *
  * @author leiii
  */
 public class Servidor extends javax.swing.JFrame {
 
+    private ServerSocket servidor;
+    private boolean activo = true;
+
     /**
      * Creates new form Servidor
      */
     public Servidor() {
         initComponents();
+        jScrollPane1.getViewport().setBackground(Color.WHITE);
+        jScrollPane1.setVerticalScrollBar(new ScrollBarCustom());
+        fixtable(jScrollPane1);
+    }
+
+    public void fixtable(JScrollPane scroll) {
+        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.setVerticalScrollBar(new ScrollBarCustom());
+        JPanel p = new JPanel();
+        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, p);
+        scroll.setBorder(new EmptyBorder(5, 10, 5, 10));
     }
 
     /**
@@ -29,7 +52,7 @@ public class Servidor extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        textareaServidor = new javax.swing.JTextArea();
         botonDetener = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         botonIniciar = new javax.swing.JPanel();
@@ -46,13 +69,18 @@ public class Servidor extends javax.swing.JFrame {
         jLabel1.setText("SERVIDOR");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(136, 32, -1, -1));
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        textareaServidor.setColumns(20);
+        textareaServidor.setRows(5);
+        jScrollPane1.setViewportView(textareaServidor);
 
         jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 340, 410));
 
         botonDetener.setBackground(new java.awt.Color(153, 0, 102));
+        botonDetener.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                botonDetenerMousePressed(evt);
+            }
+        });
 
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -75,6 +103,11 @@ public class Servidor extends javax.swing.JFrame {
         jPanel1.add(botonDetener, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 540, 120, 30));
 
         botonIniciar.setBackground(new java.awt.Color(153, 0, 102));
+        botonIniciar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                botonIniciarMousePressed(evt);
+            }
+        });
 
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Iniciar Servidor");
@@ -102,15 +135,32 @@ public class Servidor extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void botonIniciarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonIniciarMousePressed
+        try {
+            //iniciamos el servicio de escucha del servidor
+            servidor = new ServerSocket(4040);
+            textareaServidor.append("--Servidor Iniciado--");
+            HiloServidor hilo = new HiloServidor(servidor, textareaServidor, activo);
+            hilo.start();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "El servidor ya está activo o el puerto ya está en uso");
+        }
+    }//GEN-LAST:event_botonIniciarMousePressed
+
+    private void botonDetenerMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonDetenerMousePressed
+        activo = false;
+        textareaServidor.append("--Servidor Detenido--");
+    }//GEN-LAST:event_botonDetenerMousePressed
 
     /**
      * @param args the command line arguments
@@ -155,6 +205,6 @@ public class Servidor extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea textareaServidor;
     // End of variables declaration//GEN-END:variables
 }

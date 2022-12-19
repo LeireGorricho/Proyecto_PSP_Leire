@@ -295,7 +295,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
         
-        Transferencias frame = new Transferencias();
+        NuevaTransferencia frame = new NuevaTransferencia();
         frame.setSize(560,450);
         frame.setLocation(0,0);
         

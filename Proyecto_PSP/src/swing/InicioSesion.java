@@ -5,6 +5,9 @@
 package swing;
 
 import java.awt.BorderLayout;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import javax.crypto.SecretKey;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -15,14 +18,22 @@ import javax.swing.JPanel;
 public class InicioSesion extends javax.swing.JPanel {
     JPanel pane;
     static JFrame ventana = new Login();
+
+    ObjectOutputStream oos;
+    ObjectInputStream ois;
+    SecretKey key;
     /**
      * Creates new form InicioSesion
      */
-    public InicioSesion(JPanel pane, JFrame ventana) {
+    public InicioSesion(JPanel pane, JFrame ventana, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
         
         this.pane = pane;
         this.ventana = ventana;
+
+        this.oos = oos;
+        this.ois = ois;
+        this.key = key;
     }
 
     /**
@@ -130,7 +141,7 @@ public class InicioSesion extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonRegistrarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarMousePressed
-        RegistrarUsuario frame = new RegistrarUsuario(pane, ventana);
+        RegistrarUsuario frame = new RegistrarUsuario(pane, ventana, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         

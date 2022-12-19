@@ -4,17 +4,34 @@
  */
 package swing;
 
+import javax.crypto.*;
+import javax.swing.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  *
  * @author leiii
  */
 public class NuevaCuenta extends javax.swing.JPanel {
 
+    private SecretKey key;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
+    
     /**
      * Creates new form NuevaCuenta
      */
-    public NuevaCuenta() {
+    public NuevaCuenta(SecretKey key, ObjectInputStream ois, ObjectOutputStream oos) {
         initComponents();
+        this.key = key;
+        this.ois = ois;
+        this.oos = oos;
     }
 
     /**
@@ -30,7 +47,7 @@ public class NuevaCuenta extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         titular = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
-        botonCancelar = new javax.swing.JPanel();
+        botonLimpiar = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         botonCrearCuenta = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
@@ -44,48 +61,50 @@ public class NuevaCuenta extends javax.swing.JPanel {
         setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(102, 102, 102));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("NUEVA CUENTA");
-        add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 80, -1, -1));
+        add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 90, 560, -1));
 
         jLabel2.setText("Titular:");
-        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 190, -1, -1));
+        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 200, -1, -1));
 
+        titular.setEditable(false);
+        titular.setBackground(new java.awt.Color(255, 255, 255));
         titular.setBorder(null);
-        add(titular, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 190, 240, -1));
-        add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 210, 240, 10));
+        add(titular, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 200, 240, -1));
+        add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 220, 240, 10));
 
-        botonCancelar.setBackground(new java.awt.Color(153, 0, 102));
-        botonCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
+        botonLimpiar.setBackground(new java.awt.Color(153, 0, 102));
+        botonLimpiar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
-                botonCancelarMousePressed(evt);
+                botonLimpiarMousePressed(evt);
             }
         });
 
         jLabel4.setFont(new java.awt.Font("Helvetica Neue", 1, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Cancelar");
+        jLabel4.setText("Limpiar");
 
-        javax.swing.GroupLayout botonCancelarLayout = new javax.swing.GroupLayout(botonCancelar);
-        botonCancelar.setLayout(botonCancelarLayout);
-        botonCancelarLayout.setHorizontalGroup(
-            botonCancelarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(botonCancelarLayout.createSequentialGroup()
-                .addGap(29, 29, 29)
+        javax.swing.GroupLayout botonLimpiarLayout = new javax.swing.GroupLayout(botonLimpiar);
+        botonLimpiar.setLayout(botonLimpiarLayout);
+        botonLimpiarLayout.setHorizontalGroup(
+            botonLimpiarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(botonLimpiarLayout.createSequentialGroup()
+                .addGap(35, 35, 35)
                 .addComponent(jLabel4)
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
-        botonCancelarLayout.setVerticalGroup(
-            botonCancelarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(botonCancelarLayout.createSequentialGroup()
+        botonLimpiarLayout.setVerticalGroup(
+            botonLimpiarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(botonLimpiarLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel4)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        add(botonCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 300, 120, 30));
+        add(botonLimpiar, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 310, 120, 30));
 
         botonCrearCuenta.setBackground(new java.awt.Color(153, 0, 102));
         botonCrearCuenta.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -103,9 +122,9 @@ public class NuevaCuenta extends javax.swing.JPanel {
         botonCrearCuentaLayout.setHorizontalGroup(
             botonCrearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, botonCrearCuentaLayout.createSequentialGroup()
-                .addContainerGap(15, Short.MAX_VALUE)
+                .addContainerGap(19, Short.MAX_VALUE)
                 .addComponent(jLabel5)
-                .addGap(20, 20, 20))
+                .addGap(16, 16, 16))
         );
         botonCrearCuentaLayout.setVerticalGroup(
             botonCrearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -115,38 +134,69 @@ public class NuevaCuenta extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        add(botonCrearCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 300, 120, 30));
-        add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 260, 50, 10));
+        add(botonCrearCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 310, 120, 30));
+        add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 270, 50, 10));
 
+        saldo.setEditable(false);
+        saldo.setBackground(new java.awt.Color(255, 255, 255));
         saldo.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         saldo.setText("0 €");
         saldo.setBorder(null);
-        add(saldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 240, 50, -1));
+        add(saldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 250, 50, -1));
 
         jLabel6.setText("Saldo:");
-        add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, -1, -1));
-        add(jSeparator7, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 160, 240, 10));
+        add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 250, -1, -1));
+        add(jSeparator7, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 170, 240, 10));
 
         numCuenta.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         numCuenta.setBorder(null);
-        add(numCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 140, 240, -1));
+        add(numCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 150, 240, -1));
 
         jLabel10.setText("Número de cuenta:");
-        add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 140, -1, -1));
+        add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 150, -1, -1));
     }// </editor-fold>//GEN-END:initComponents
 
-    private void botonCancelarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonCancelarMousePressed
-        //Limpiar el número de cuenta
-    }//GEN-LAST:event_botonCancelarMousePressed
+    private void botonLimpiarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonLimpiarMousePressed
+        numCuenta.setText("");
+    }//GEN-LAST:event_botonLimpiarMousePressed
 
     private void botonCrearCuentaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonCrearCuentaMousePressed
-        // TODO add your handling code here:
+        try {
+            //configuranmos el pattern de la cuenta y comprovamos los campos
+            Pattern pattern  = Pattern.compile("^([A-Za-z]{2}[0-9]{2} [0-9]{4} [0-9]{2} [0-9]{10})$");
+            Matcher ncuenta = pattern.matcher(numCuenta.getText());
+            if (!numCuenta.getText().isBlank() && ncuenta.find()) {
+                //mandamos la opcion que hemos elegido
+                oos.writeObject(2);
+                Cipher desCipher = Cipher.getInstance("DES");
+                desCipher.init(Cipher.ENCRYPT_MODE, key);
+                byte[] nencriptado = desCipher.doFinal(numCuenta.getText().getBytes());
+                //mandamos la cuenta que queremos añadir y recuperamos la comprovacion
+                oos.writeObject(nencriptado);
+                if ((boolean) ois.readObject()) {
+                    JOptionPane.showMessageDialog(null, "La cuenta se ha creado correctamente.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Ya existe una cuenta con este número de cuenta");
+                    numCuenta.setText("");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "El número de cuenta está mal escrito o vacio");
+            }
+        } catch (IOException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException ex) {
+            JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado.");
+        } catch (NoSuchAlgorithmException ex) {
+            JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo");
+        } catch (InvalidKeyException ex) {
+            JOptionPane.showMessageDialog(null, "La llave no es correcta");
+        } catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(null, "No se han podido cargar los datos");
+        }
     }//GEN-LAST:event_botonCrearCuentaMousePressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel botonCancelar;
     private javax.swing.JPanel botonCrearCuenta;
+    private javax.swing.JPanel botonLimpiar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;

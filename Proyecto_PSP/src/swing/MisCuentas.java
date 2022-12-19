@@ -7,12 +7,20 @@ package swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import javax.crypto.*;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
+import clases.Cuenta;
 import scrollbar.ScrollBarCustom;
 import table.TableHeader;
 
@@ -22,16 +30,22 @@ import table.TableHeader;
  */
 public class MisCuentas extends javax.swing.JPanel {
     String[] nombreColumnas = {"Número de cuenta", "Titular", "Saldo"};
-    JPanel pane;
+    JPanel panel;
+    private SecretKey key;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
     
     /**
      * Creates new form MisCuentas
      */
-    public MisCuentas(JPanel pane) {
+    public MisCuentas(JPanel panel) {
         initComponents();
-        
-        this.pane = pane;
-        
+        this.key = key;
+        this.oos = oos;
+        this.ois = ois;
+        this.panel = panel;
+
+        //Le damos otro estilo a la tabla
         tablaMisCuentas.setShowHorizontalLines(true);
         tablaMisCuentas.setGridColor(new Color(230,230,230));
         tablaMisCuentas.setRowHeight(40);
@@ -46,10 +60,13 @@ public class MisCuentas extends javax.swing.JPanel {
                 return header;
             }
        });
+
        jScrollPane1.getViewport().setBackground(Color.WHITE);
        jScrollPane1.setVerticalScrollBar(new ScrollBarCustom());
        fixtable(jScrollPane1);
-       // cargarDatos();
+
+       //Cargamos los datos en la tabla
+       cargarDatos();
     }
     
     public void fixtable(JScrollPane scroll) {
@@ -59,7 +76,40 @@ public class MisCuentas extends javax.swing.JPanel {
         scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, p);
         scroll.setBorder(new EmptyBorder(5, 10, 5, 10));
     }
-    
+
+    public void cargarDatos() {
+        try {
+            //mandamos la opcion que queremos
+            oos.writeObject(1);
+            Cipher desCipher = Cipher.getInstance("DES");
+            desCipher.init(Cipher.DECRYPT_MODE, key);
+            //recuperamos la lista de cuentas del cliente encriptadas
+            byte[] cuentasCifradas = (byte[]) ois.readObject();
+            byte[] cuentasBytes = desCipher.doFinal(cuentasCifradas);
+            ByteArrayInputStream bis = new ByteArrayInputStream(cuentasBytes);
+            ObjectInputStream oisbytes = new ObjectInputStream(bis);
+            List<Cuenta> cuentas = (List<Cuenta>) oisbytes.readObject();
+            bis.close();
+            oisbytes.close();
+            //cargamos las cuentas en la tabla para mostrarlas
+            int cantidad = cuentas.size();
+            String[][] d = new String[cantidad][2];
+            String[] nombreColumnas = {"Número de cuenta", "Saldo"};
+            for (int i = 0; i < cuentas.size(); i++) {
+                d[i][0] = String.valueOf(cuentas.get(i).getNumeroCuenta());
+                d[i][1] = String.valueOf(cuentas.get(i).getSaldo());
+            }
+            tablaMisCuentas.setModel(new DefaultTableModel(d, nombreColumnas));
+        } catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException e) {
+            JOptionPane.showMessageDialog(null, "Ha ocurrido un error inesperado");
+        } catch (NoSuchAlgorithmException e) {
+            JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo");
+        } catch (InvalidKeyException e) {
+            JOptionPane.showMessageDialog(null, "La llave no es correcta");
+        } catch (ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "No se han podido cargar los datos");
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -131,14 +181,14 @@ public class MisCuentas extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonVerMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonVerMousePressed
-        InfoCuenta frame = new InfoCuenta(pane);
+        InfoCuenta frame = new InfoCuenta(panel);
         frame.setSize(560,450);
         frame.setLocation(0,0);
         
-        pane.removeAll();
-        pane.add(frame, BorderLayout.CENTER);
-        pane.revalidate();
-        pane.repaint();
+        panel.removeAll();
+        panel.add(frame, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
     }//GEN-LAST:event_botonVerMousePressed
 
 

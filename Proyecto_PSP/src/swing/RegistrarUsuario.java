@@ -4,9 +4,18 @@
  */
 package swing;
 
+import clases.NuevoCliente;
+
 import java.awt.BorderLayout;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.crypto.*;
+import javax.swing.*;
 
 /**
  *
@@ -15,14 +24,45 @@ import javax.swing.JPanel;
 public class RegistrarUsuario extends javax.swing.JPanel {
     JPanel pane;
     static JFrame ventana = new Login();
+
+    ObjectOutputStream oos;
+    ObjectInputStream ois;
+    SecretKey key;
+    private boolean check;
     /**
      * Creates new form RegistrarUsuario
      */
-    public RegistrarUsuario(JPanel pane, JFrame ventana) {
+    public RegistrarUsuario(JPanel pane, JFrame ventana, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
-        
+        this.oos = oos;
+        this.ois = ois;
+        this.key = key;
         this.pane = pane;
         this.ventana = ventana;
+
+        try {
+            oos.writeObject(3);
+            byte[] firma = (byte[]) ois.readObject();
+            PublicKey clavepub = (PublicKey) ois.readObject();
+            Signature verificarsa = Signature.getInstance("SHA1WITHRSA");
+            verificarsa.initVerify(clavepub);
+            check = verificarsa.verify(firma);
+            if (check) {
+                JOptionPane.showMessageDialog(null, "El documento se ha firmado digitalmente");
+            } else {
+                JOptionPane.showMessageDialog(null, "El documento firmado no concide");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -192,7 +232,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonCancelarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonCancelarMousePressed
-        InicioSesion frame = new InicioSesion(pane, ventana);
+        InicioSesion frame = new InicioSesion(pane, ventana, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         
@@ -203,7 +243,76 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     }//GEN-LAST:event_botonCancelarMousePressed
 
     private void botonRegistrarseMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarseMousePressed
-        // TODO add your handling code here:
+        //comrovamos que ha acceptado los terminos con firma digital
+        if (checkTerminos.isSelected() && check) {
+            try {
+                //creamos pattern para que escriba la primera letra de el nombre y apellido en mayus
+                int numEdad = Integer.parseInt(edad.getText());
+                Pattern mayus = Pattern.compile("^([A-Z]{1}[a-z]+)$");
+                if (!nombre.getText().isBlank() && !apellido.getText().isBlank() && !edad.getText().isBlank() && !email.getText().isBlank() && !usuario.getText().isBlank() && !contrasena.getText().isBlank() && !contrasenaRepetida.getText().isBlank()) {
+                    if (contrasena == contrasenaRepetida){
+                        Matcher mNombre = mayus.matcher(nombre.getText());
+                        Matcher mApellido = mayus.matcher(apellido.getText());
+                        if (mNombre.find() && mApellido.find()) {
+                            //duda preguntar
+                            Pattern edadp = Pattern.compile("^[0-9]{1,3}$");
+                            Matcher edadmatch = edadp.matcher(edad.getText());
+                            if (edadmatch.find()) {
+                                //enviamos la opcion escogida
+                                oos.writeObject(2);
+                                //creamos un objeto con todos los datos para registrase
+                                MessageDigest md = MessageDigest.getInstance("SHA");
+                                byte[] contrasenaBytes = contrasena.getText().getBytes();
+                                md.update(contrasenaBytes);
+                                byte[] resumen = md.digest();
+                                String hashContrasena = new String(resumen);
+                                NuevoCliente registrarse = new NuevoCliente(nombre.getText(), apellido.getText(), numEdad, email.getText(), usuario.getText(), hashContrasena);
+                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                ObjectOutputStream oosbytes = new ObjectOutputStream(bos);
+                                //lo comvertimos a bytes
+                                oosbytes.writeObject(registrarse);
+                                oosbytes.flush();
+                                byte[] registrarsebytes = bos.toByteArray();
+                                Cipher desCipher = Cipher.getInstance("DES");
+                                //configuramos modo descifrar
+                                desCipher.init(Cipher.ENCRYPT_MODE, key);
+                                byte[] registrarseCifrado = desCipher.doFinal(registrarsebytes);
+                                //enviamos objeto cifrado
+                                oos.writeObject(registrarseCifrado);
+                                JOptionPane.showMessageDialog(null, "Se ha registrado el nuevo cliente");
+                                //Vamos al panel de inicio de sesion
+                                InicioSesion frame = new InicioSesion(pane, ventana, oos, ois, key);
+                                frame.setSize(490,450);
+                                frame.setLocation(0,0);
+
+                                pane.removeAll();
+                                pane.add(frame, BorderLayout.CENTER);
+                                pane.revalidate();
+                                pane.repaint();
+                            } else {
+                                JOptionPane.showMessageDialog(null, "La edad puede ser de 3 dígitos como mucho");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Comprueba que el nombre y el apellido estan bien escritos");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Las contraseñas deben ser iguales");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Debes rellenar todos los campos para poder registrarte");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Los datos del campo de edad no son validos");
+            } catch (NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | IOException ex) {
+                JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado");
+            } catch (NoSuchAlgorithmException ex) {
+                JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo");
+            } catch (InvalidKeyException ex) {
+                JOptionPane.showMessageDialog(null, "La llave no es correcta");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Tienes que aceptar los terminos para poder crear una cuenta nueva");
+        }
     }//GEN-LAST:event_botonRegistrarseMousePressed
 
 
