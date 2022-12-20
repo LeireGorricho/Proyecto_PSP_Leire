@@ -1,10 +1,12 @@
 package clases;
 
-public class Cliente {
+import java.io.Serializable;
+
+public class Cliente implements Serializable {
     //Atributos
+    private int id;
     private String usuario;
     private String contrasena;
-    private int id;
     private boolean acierto = false;
 
     //Constructor

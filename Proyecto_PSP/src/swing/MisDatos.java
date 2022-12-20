@@ -4,17 +4,74 @@
  */
 package swing;
 
+import clases.Cuenta;
+import clases.NuevoCliente;
+
+import javax.crypto.*;
+import javax.swing.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+
 /**
  *
  * @author leiii
  */
 public class MisDatos extends javax.swing.JPanel {
 
+    private SecretKey key;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
+    
     /**
      * Creates new form MisDatos
      */
-    public MisDatos() {
+    public MisDatos(SecretKey key, ObjectInputStream ois, ObjectOutputStream oos) {
         initComponents();
+        this.key = key;
+        this.ois = ois;
+        this.oos = oos;
+
+        try {
+            //mandamos la opcion para cargar el combobox con datos
+            oos.writeObject(7);
+            //recuperamos los datos
+            byte[] datosEncriptados = (byte[]) ois.readObject();
+            Cipher desCipher = Cipher.getInstance("DES");
+            desCipher.init(Cipher.DECRYPT_MODE, key);
+            byte[] datosBytes = desCipher.doFinal(datosEncriptados);
+            ByteArrayInputStream bis = new ByteArrayInputStream(datosBytes);
+            ObjectInputStream oisbytes = new ObjectInputStream(bis);
+            //Mostramos los datos del cliente
+            NuevoCliente cli = (NuevoCliente) oisbytes.readObject();
+            bis.close();
+            oisbytes.close();
+
+            nombre.setText(cli.getNombre());
+            apellido.setText(cli.getApellido());
+            edad.setText(String.valueOf(cli.getEdad()));
+            email.setText(cli.getEmail());
+            usuario.setText(cli.getUsuario());
+            contrasena.setText(cli.getContrasena());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Ha ocurrido un error inesperado");
+        } catch (NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

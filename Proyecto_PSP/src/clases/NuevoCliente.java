@@ -1,7 +1,10 @@
 package clases;
 
-public class NuevoCliente {
+import java.io.Serializable;
+
+public class NuevoCliente implements Serializable {
     //Atributos
+    private int id;
     private String nombre;
     private String apellido;
     private int edad;
@@ -11,6 +14,16 @@ public class NuevoCliente {
 
     //Constructor
     public NuevoCliente(String nombre, String apellido, int edad, String email, String usuario, String contrasena) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.edad = edad;
+        this.email = email;
+        this.usuario = usuario;
+        this.contrasena = contrasena;
+    }
+
+    public NuevoCliente(int id, String nombre, String apellido, int edad, String email, String usuario, String contrasena) {
+        this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;

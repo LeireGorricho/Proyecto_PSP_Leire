@@ -24,6 +24,7 @@ import javax.swing.*;
 public class RegistrarUsuario extends javax.swing.JPanel {
     
     JPanel panel;
+    JFrame ventana;
     ObjectOutputStream oos;
     ObjectInputStream ois;
     SecretKey key;
@@ -31,17 +32,18 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     /**
      * Creates new form RegistrarUsuario
      */
-    public RegistrarUsuario(JPanel panel, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
+    public RegistrarUsuario(JFrame ventana, JPanel panel, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
         this.oos = oos;
         this.ois = ois;
         this.key = key;
         this.panel = panel;
+        this.ventana = ventana;
 
         try {
             oos.writeObject(3);
-            byte[] firma = (byte[]) ois.readObject();
             PublicKey clavepub = (PublicKey) ois.readObject();
+            byte[] firma = (byte[]) ois.readObject();
             Signature verificarsa = Signature.getInstance("SHA1WITHRSA");
             verificarsa.initVerify(clavepub);
             check = verificarsa.verify(firma);
@@ -234,7 +236,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonCancelarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonCancelarMousePressed
-        InicioSesion frame = new InicioSesion(panel, oos, ois, key);
+        InicioSesion frame = new InicioSesion(ventana, panel, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         
@@ -246,13 +248,13 @@ public class RegistrarUsuario extends javax.swing.JPanel {
 
     private void botonRegistrarseMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarseMousePressed
         //comrovamos que ha acceptado los terminos con firma digital
-        if (terminos.isSelected() && check) {
+        //if (terminos.isSelected() && check) {
             try {
                 //creamos pattern para que escriba la primera letra de el nombre y apellido en mayus
                 int numEdad = Integer.parseInt(edad.getText());
                 Pattern mayus = Pattern.compile("^([A-Z]{1}[a-z]+)$");
                 if (!nombre.getText().isBlank() && !apellido.getText().isBlank() && !edad.getText().isBlank() && !email.getText().isBlank() && !usuario.getText().isBlank() && !contrasena.getText().isBlank() && !contrasenaRepetida.getText().isBlank()) {
-                    if (contrasena == contrasenaRepetida){
+                    if (contrasena.getText().equals(contrasenaRepetida.getText())){
                         Matcher mNombre = mayus.matcher(nombre.getText());
                         Matcher mApellido = mayus.matcher(apellido.getText());
                         if (mNombre.find() && mApellido.find()) {
@@ -283,7 +285,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
                                 oos.writeObject(registrarseCifrado);
                                 JOptionPane.showMessageDialog(null, "Se ha registrado el nuevo cliente");
                                 //Vamos al panel de inicio de sesion
-                                InicioSesion frame = new InicioSesion(panel, oos, ois, key);
+                                InicioSesion frame = new InicioSesion(ventana, panel, oos, ois, key);
                                 frame.setSize(490,450);
                                 frame.setLocation(0,0);
 
@@ -312,9 +314,9 @@ public class RegistrarUsuario extends javax.swing.JPanel {
             } catch (InvalidKeyException ex) {
                 JOptionPane.showMessageDialog(null, "La llave no es correcta");
             }
-        } else {
+        /*} else {
             JOptionPane.showMessageDialog(null, "Tienes que aceptar los terminos para poder crear una cuenta nueva");
-        }
+        }*/
     }//GEN-LAST:event_botonRegistrarseMousePressed
 
 

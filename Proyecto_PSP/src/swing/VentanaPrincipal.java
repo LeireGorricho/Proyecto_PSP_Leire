@@ -19,10 +19,9 @@ import javax.swing.*;
  */
 public class VentanaPrincipal extends javax.swing.JFrame {
 
-    static private ObjectInputStream ois;
-    static private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
     static private SecretKey key;
-    JFrame ventana = new VentanaPrincipal(ois, oos, key);
     
     /**
      * Creates new form VentanaPrincipal
@@ -198,7 +197,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         labelMisDatos.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         labelMisDatos.setForeground(new java.awt.Color(255, 255, 255));
         labelMisDatos.setText("Mis Datos");
-        botonMisDatos.add(labelMisDatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(31, 17, -1, -1));
+        botonMisDatos.add(labelMisDatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         jPanel2.add(botonMisDatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 190, 190, 50));
 
@@ -208,6 +207,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 botonCrearCuentaMousePressed(evt);
             }
         });
+        botonCrearCuenta.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         bordeCrearCuenta.setBackground(new java.awt.Color(153, 0, 102));
 
@@ -222,30 +222,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             .addGap(0, 50, Short.MAX_VALUE)
         );
 
+        botonCrearCuenta.add(bordeCrearCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
         labelCrearCuenta.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         labelCrearCuenta.setForeground(new java.awt.Color(255, 255, 255));
         labelCrearCuenta.setText("Crear Cuenta");
-
-        javax.swing.GroupLayout botonCrearCuentaLayout = new javax.swing.GroupLayout(botonCrearCuenta);
-        botonCrearCuenta.setLayout(botonCrearCuentaLayout);
-        botonCrearCuentaLayout.setHorizontalGroup(
-            botonCrearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(botonCrearCuentaLayout.createSequentialGroup()
-                .addComponent(bordeCrearCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(labelCrearCuenta)
-                .addGap(0, 84, Short.MAX_VALUE))
-        );
-        botonCrearCuentaLayout.setVerticalGroup(
-            botonCrearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, botonCrearCuentaLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(bordeCrearCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(botonCrearCuentaLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(labelCrearCuenta)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        botonCrearCuenta.add(labelCrearCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         jPanel2.add(botonCrearCuenta, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 240, 190, 50));
 
@@ -322,9 +304,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonTransferencias, bordeTransferencias, labelTransferencias);
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
-        
+
+        try {
+            oos.writeObject(6);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado");
+        }
         new Login(ois, oos, key).setVisible(true);           
-        ventana.dispose();
+        dispose();
     }//GEN-LAST:event_botonCerrarSesionMousePressed
 
     private void botonMisDatosMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonMisDatosMousePressed
@@ -334,7 +321,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonCerrarSesion, bordeCerrarSesion, labelCerrarSesion);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
         
-        MisDatos frame = new MisDatos();
+        MisDatos frame = new MisDatos(key, ois, oos);
         frame.setSize(560,450);
         frame.setLocation(0,0);
         
@@ -391,7 +378,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new VentanaPrincipal(ois, oos, key).setVisible(true);
+                //new VentanaPrincipal(ois, oos, key).setVisible(true);
             }
         });
     }

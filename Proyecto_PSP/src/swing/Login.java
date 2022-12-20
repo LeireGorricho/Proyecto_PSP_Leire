@@ -35,7 +35,7 @@ public class Login extends javax.swing.JFrame {
         this.oos = oos;
         this.key = key;
 
-        InicioSesion frame = new InicioSesion(panel_log, oos, ois, key);
+        InicioSesion frame = new InicioSesion(this, panel_log, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         panel_log.removeAll();

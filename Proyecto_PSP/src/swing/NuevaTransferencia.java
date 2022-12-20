@@ -41,7 +41,7 @@ public class NuevaTransferencia extends javax.swing.JPanel {
 
         try {
             //mandamos la opcion para cargar el combobox con datos
-            oos.writeObject(3);
+            oos.writeObject(2);
             //recuperamos la lista de cuentas y la cargamos en el combobox
             byte[] cuentasEncriptadas = (byte[]) ois.readObject();
             Cipher desCipher = Cipher.getInstance("DES");
@@ -49,15 +49,13 @@ public class NuevaTransferencia extends javax.swing.JPanel {
             byte[] cuentasBytes = desCipher.doFinal(cuentasEncriptadas);
             ByteArrayInputStream bis = new ByteArrayInputStream(cuentasBytes);
             ObjectInputStream oisbytes = new ObjectInputStream(bis);
-            //Mostramos las cuentas del cliente
             List<Cuenta> cuentas = (List<Cuenta>) oisbytes.readObject();
             bis.close();
             oisbytes.close();
+            //Mostramos todas las cuentas guardadas en la base de datos
             for (Cuenta cuenta : cuentas) {
                 cuentaRemitente.addItem(cuenta.getNumeroCuenta());
             }
-            //Mostramos todas las cuentas guardadas en la base de datos
-
             //Damos a la fecha el valor de hoy
             fecha.setText(String.valueOf(new Date()));
 
@@ -86,7 +84,6 @@ public class NuevaTransferencia extends javax.swing.JPanel {
         botonLimpiar = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        cuentaDestinataria = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         cantidad = new javax.swing.JTextField();
@@ -101,6 +98,7 @@ public class NuevaTransferencia extends javax.swing.JPanel {
         jLabel8 = new javax.swing.JLabel();
         concepto = new javax.swing.JTextField();
         jSeparator5 = new javax.swing.JSeparator();
+        cuentaDestinataria = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -169,20 +167,18 @@ public class NuevaTransferencia extends javax.swing.JPanel {
         jLabel1.setText("Cuenta destinataria:");
         add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(65, 150, -1, -1));
 
-        cuentaDestinataria.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        add(cuentaDestinataria, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 150, 190, -1));
-
         jLabel2.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("TRANSFERENCIA");
-        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 40, -1, -1));
+        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 40, 540, -1));
 
         jLabel3.setText("Cantidad:");
         add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(65, 250, -1, -1));
 
         cantidad.setBorder(null);
         add(cantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 250, 170, -1));
-        add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 180, 190, 10));
+        add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 170, 190, 10));
         add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 270, 170, 10));
 
         jLabel4.setText("Fecha:");
@@ -197,9 +193,8 @@ public class NuevaTransferencia extends javax.swing.JPanel {
         jLabel7.setText("Cuenta remitente:");
         add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(65, 100, -1, -1));
 
-        cuentaRemitente.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         add(cuentaRemitente, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 100, 190, -1));
-        add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 130, 190, 10));
+        add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 125, 190, 10));
 
         jLabel8.setText("Concepto:");
         add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(65, 200, -1, -1));
@@ -207,6 +202,9 @@ public class NuevaTransferencia extends javax.swing.JPanel {
         concepto.setBorder(null);
         add(concepto, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 310, -1));
         add(jSeparator5, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 220, 310, 10));
+
+        cuentaDestinataria.setBorder(null);
+        add(cuentaDestinataria, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 150, 190, -1));
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonRealizarTransferenciaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRealizarTransferenciaMousePressed
@@ -215,13 +213,12 @@ public class NuevaTransferencia extends javax.swing.JPanel {
             double numCantidad = Double.parseDouble(cantidad.getText());
             if (!concepto.getText().isBlank() && !cantidad.getText().isBlank()) {
                 Pattern pattern  = Pattern.compile("^([A-Za-z]{2}[0-9]{2} [0-9]{4} [0-9]{2} [0-9]{10})$");
-                // Matcher matcher = pattern.matcher(cuentaDestinataria.getText());
-                /*if (matcher.find()) {
+                Matcher matcher = pattern.matcher(cuentaDestinataria.getText());
+                if (!cuentaDestinataria.getText().isBlank() && matcher.find()) {
                     //mandamos la opcion seleccionada
-                    oos.writeObject(5);
+                    oos.writeObject(3);
                     String ncuentaremitente = cuentaRemitente.getSelectedItem().toString();
-                    String ncuentadestinatario = cuentaDestinataria.getSelectedItem().toString();
-                    Transferencia transferencia = new Transferencia(ncuentaremitente, ncuentadestinatario, concepto.getText(), numCantidad, fecha.getText());
+                    Transferencia transferencia = new Transferencia(ncuentaremitente, cuentaDestinataria.getText(), concepto.getText(), numCantidad, fecha.getText());
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutputStream oosbytes = new ObjectOutputStream(bos);
                     oosbytes.writeObject(transferencia);
@@ -243,17 +240,19 @@ public class NuevaTransferencia extends javax.swing.JPanel {
                     JFrame telefono = new Telefono(ois, oos, key);
                     telefono.setVisible(true);
                 } else {
-                    JOptionPane.showMessageDialog(null, "La cuenta esta mal escrita ej. AA00 0000 00 0000000000");
-                }*/
+                    JOptionPane.showMessageDialog(null, "El número de cuenta debe escribirse como en este ejemplo: AA00 0000 00 0000000000");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Debes rellenar todos los datos");
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "La cantidad esta mal escrita comprueba que es un valor numerico.");
-        /*} catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException ex) {
-            JOptionPane.showMessageDialog(null, "ERROR inesperado.");
+            JOptionPane.showMessageDialog(null, "La cantidad debe ser un valor numerico");
+        } catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException ex) {
+            JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado");
         } catch (NoSuchAlgorithmException ex) {
-            JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo.");
+            JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo");
         } catch (InvalidKeyException ex) {
-            JOptionPane.showMessageDialog(null, "La llave no es la correcta.");*/
+            JOptionPane.showMessageDialog(null, "La llave no es correcta");
         }
     }//GEN-LAST:event_botonRealizarTransferenciaMousePressed
 
@@ -268,7 +267,7 @@ public class NuevaTransferencia extends javax.swing.JPanel {
     private javax.swing.JPanel botonRealizarTransferencia;
     private javax.swing.JTextField cantidad;
     private javax.swing.JTextField concepto;
-    private javax.swing.JComboBox<String> cuentaDestinataria;
+    private javax.swing.JTextField cuentaDestinataria;
     private javax.swing.JComboBox<String> cuentaRemitente;
     private javax.swing.JTextField fecha;
     private javax.swing.JLabel jLabel1;

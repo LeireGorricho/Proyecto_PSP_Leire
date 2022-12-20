@@ -40,9 +40,9 @@ public class MisCuentas extends javax.swing.JPanel {
      */
     public MisCuentas(JPanel panel, ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
         initComponents();
-        this.key = key;
-        this.oos = oos;
         this.ois = ois;
+        this.oos = oos;
+        this.key = key;
         this.panel = panel;
 
         //Le damos otro estilo a la tabla
@@ -181,13 +181,17 @@ public class MisCuentas extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonVerMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonVerMousePressed
-        InfoCuenta frame = new InfoCuenta(panel, ois, oos, key);
-        frame.setSize(560,450);
-        frame.setLocation(0,0);
-        panel.removeAll();
-        panel.add(frame, BorderLayout.CENTER);
-        panel.revalidate();
-        panel.repaint();
+        if(tablaMisCuentas.getSelectedRow() == -1){
+            JOptionPane.showMessageDialog(null, "Debes seleccionar una cuenta de la tabla");
+        } else {
+            InfoCuenta frame = new InfoCuenta(panel, ois, oos, key, tablaMisCuentas.getValueAt(tablaMisCuentas.getSelectedRow(), 0).toString(), tablaMisCuentas.getValueAt(tablaMisCuentas.getSelectedRow(), 1).toString());
+            frame.setSize(560, 450);
+            frame.setLocation(0, 0);
+            panel.removeAll();
+            panel.add(frame, BorderLayout.CENTER);
+            panel.revalidate();
+            panel.repaint();
+        }
     }//GEN-LAST:event_botonVerMousePressed
 
 

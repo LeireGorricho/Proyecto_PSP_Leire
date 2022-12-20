@@ -37,7 +37,7 @@ public class InfoCuenta extends javax.swing.JPanel {
     /**
      * Creates new form InfoCuenta
      */
-    public InfoCuenta(JPanel panel, ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
+    public InfoCuenta(JPanel panel, ObjectInputStream ois, ObjectOutputStream oos, SecretKey key, String numero, String saldoCantidad) {
         initComponents();
         this.key = key;
         this.oos = oos;
@@ -61,7 +61,18 @@ public class InfoCuenta extends javax.swing.JPanel {
        jScrollPane1.getViewport().setBackground(Color.WHITE);
        jScrollPane1.setVerticalScrollBar(new ScrollBarCustom());
        fixtable(jScrollPane1);
-       // cargarDatos();
+       numCuenta.setText(numero);
+       saldo.setText(saldoCantidad);
+        try {
+            oos.writeObject(9);
+            String usuarioCliente = (String) ois.readObject();
+            titular.setText(usuarioCliente);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+       cargarDatos(numero);
     }
 
     public void fixtable(JScrollPane scroll) {
@@ -72,11 +83,14 @@ public class InfoCuenta extends javax.swing.JPanel {
         scroll.setBorder(new EmptyBorder(5, 10, 5, 10));
     }
     
-    public void cargarDatos(){
+    public void cargarDatos(String numeroCuenta){
         try {
             //mandamos la opcion que hemos escogido
             oos.writeObject(4);
             Cipher desCipher = Cipher.getInstance("DES");
+            desCipher.init(Cipher.ENCRYPT_MODE, key);
+            //enviamos el número de cuanta para que recoga sus transferencias
+            oos.writeObject(desCipher.doFinal(numeroCuenta.getBytes()));
             desCipher.init(Cipher.DECRYPT_MODE, key);
             //recuperamos la lista de movimientos
             byte[] movimientosCifradas = (byte[]) ois.readObject();
@@ -175,7 +189,7 @@ public class InfoCuenta extends javax.swing.JPanel {
         jLabel5.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
         jLabel5.setText("TRANSFERENCIAS");
-        add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 180, -1, -1));
+        add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, -1, -1));
 
         tablaTransferencias.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -190,7 +204,7 @@ public class InfoCuenta extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(tablaTransferencias);
 
-        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(42, 210, 470, 250));
+        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 210, 510, 250));
     }// </editor-fold>//GEN-END:initComponents
 
 

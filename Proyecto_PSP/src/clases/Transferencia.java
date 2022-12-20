@@ -1,6 +1,8 @@
 package clases;
 
-public class Transferencia {
+import java.io.Serializable;
+
+public class Transferencia implements Serializable {
     //Atributos
     private String remitente;
     private String destinatario;

@@ -20,6 +20,7 @@ import javax.swing.*;
  */
 public class InicioSesion extends javax.swing.JPanel {
     JPanel pane;
+    JFrame ventana;
     private Cipher cipher;
     ObjectOutputStream oos;
     ObjectInputStream ois;
@@ -28,12 +29,13 @@ public class InicioSesion extends javax.swing.JPanel {
     /**
      * Creates new form InicioSesion
      */
-    public InicioSesion(JPanel pane, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
+    public InicioSesion(JFrame ventana, JPanel pane, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
         this.oos = oos;
         this.ois = ois;
         this.key = key;
         this.pane = pane;
+        this.ventana = ventana;
     }
 
     /**
@@ -50,12 +52,12 @@ public class InicioSesion extends javax.swing.JPanel {
         usuario = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel3 = new javax.swing.JLabel();
-        contrasena = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
         botonRegistrar = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         botonIniciarSesion = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
+        contrasena = new javax.swing.JPasswordField();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -76,9 +78,6 @@ public class InicioSesion extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Helvetica Neue", 0, 16)); // NOI18N
         jLabel3.setText("CONTRASEÑA");
         add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 240, -1, -1));
-
-        contrasena.setBorder(null);
-        add(contrasena, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 270, 350, -1));
         add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 290, 350, 10));
 
         botonRegistrar.setBackground(new java.awt.Color(153, 0, 102));
@@ -138,13 +137,15 @@ public class InicioSesion extends javax.swing.JPanel {
         );
 
         add(botonIniciarSesion, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 370, 120, 30));
+
+        contrasena.setBorder(null);
+        add(contrasena, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 270, 350, -1));
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonRegistrarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarMousePressed
-        RegistrarUsuario frame = new RegistrarUsuario(pane, oos, ois, key);
+        RegistrarUsuario frame = new RegistrarUsuario(ventana, pane, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
-        
         pane.removeAll();
         pane.add(frame, BorderLayout.CENTER);
         pane.revalidate();
@@ -167,20 +168,20 @@ public class InicioSesion extends javax.swing.JPanel {
                 //creamos un objeto con todos los datos del inicio de sesion
                 Cliente cliente = new Cliente(usuario.getText(), hashContrasena);
                 //lo comvertimos a bytes
-                oosbytes.writeObject(usuario);
+                oosbytes.writeObject(cliente);
                 oosbytes.flush();
                 byte[] userbytes = bos.toByteArray();
                 //recogemos la clave
                 cipher = Cipher.getInstance("DES");
                 //configuramos modo encriptar
                 cipher.init(Cipher.ENCRYPT_MODE, key);
-                byte[] userCifrado = cipher.doFinal(userbytes);
+                byte[] clienteCifrado = cipher.doFinal(userbytes);
                 //enviamos objeto cifrado
-                oos.writeObject(userCifrado);
+                oos.writeObject(clienteCifrado);
                 //recogemos login
                 cipher.init(Cipher.DECRYPT_MODE, key);
-                userCifrado = (byte[]) ois.readObject();
-                userbytes = cipher.doFinal(userCifrado);
+                clienteCifrado = (byte[]) ois.readObject();
+                userbytes = cipher.doFinal(clienteCifrado);
                 ByteArrayInputStream bis = new ByteArrayInputStream(userbytes);
                 ObjectInputStream oisbytes = new ObjectInputStream(bis);
                 cliente = (Cliente) oisbytes.readObject();
@@ -188,7 +189,7 @@ public class InicioSesion extends javax.swing.JPanel {
                 oisbytes.close();
                 if (cliente.isAcierto()) {
                     new VentanaPrincipal(ois, oos, key).setVisible(true);
-                    new Login(ois, oos, key).dispose();
+                    ventana.dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
                 }
@@ -211,7 +212,7 @@ public class InicioSesion extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel botonIniciarSesion;
     private javax.swing.JPanel botonRegistrar;
-    private javax.swing.JTextField contrasena;
+    private javax.swing.JPasswordField contrasena;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

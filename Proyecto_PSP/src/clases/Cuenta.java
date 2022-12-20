@@ -1,6 +1,8 @@
 package clases;
 
-public class Cuenta {
+import java.io.Serializable;
+
+public class Cuenta implements Serializable {
     //Atributos
     private int id;
     private String numeroCuenta;

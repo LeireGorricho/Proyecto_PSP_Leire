@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class HiloCliente extends Thread{
     //Atributos
@@ -22,12 +26,16 @@ public class HiloCliente extends Thread{
     private SecretKey key;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
+    private Logger logger;
+    private FileHandler fh;
 
     //Constructor
-    public HiloCliente(Socket socketCliente, JTextArea texto, boolean activo) {
+    public HiloCliente(Socket socketCliente, JTextArea texto, boolean activo, Logger logger, FileHandler fh) {
         this.socketCliente = socketCliente;
         this.texto = texto;
         this.activo = activo;
+        this.fh = fh;
+        this.logger = logger;
     }
 
     @Override
@@ -70,13 +78,17 @@ public class HiloCliente extends Thread{
             }
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (NoSuchPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"El algoritmo no es correcto");
+            logger.addHandler(fh);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
         }
     }
 
@@ -91,7 +103,7 @@ public class HiloCliente extends Thread{
             ObjectInputStream oisbytes = new ObjectInputStream(bis);
             cliente = (Cliente) oisbytes.readObject();
             texto.append("Comprobando datos para el inicio de sesión...\n");
-            String query = "SELECT * FROM usuarios WHERE usuario = ? and contrasena = ?";
+            String query = "SELECT * FROM clientes WHERE usuario = ? and contrasena = ?";
             PreparedStatement ps = conexion.prepareStatement(query);
             ps.setString(1, cliente.getUsuario());
             ps.setString(2, cliente.getContrasena());
@@ -120,15 +132,20 @@ public class HiloCliente extends Thread{
             oosbytes.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING,"No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
         }
     }
 
@@ -143,7 +160,7 @@ public class HiloCliente extends Thread{
             bis.close();
             oisbytes.close();
             texto.append("Registrando nuevo cliente: " + registrarse.getUsuario() + "\n");
-            String query = "INSERT INTO usuarios(nombre, apellido, edad, email, usuario, contrasena) VALUES(?, ?, ?, ?, ?, ?)";
+            String query = "INSERT INTO clientes(nombre, apellido, edad, email, usuario, contrasena) VALUES(?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conexion.prepareStatement(query);
             ps.setString(1, registrarse.getNombre());
             ps.setString(2, registrarse.getApellido());
@@ -156,15 +173,20 @@ public class HiloCliente extends Thread{
             ps.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
         }
     }
 
@@ -186,8 +208,8 @@ public class HiloCliente extends Thread{
                         realizarTransferencia();
                         break;
                     case 4:
-                        texto.append(cliente.getUsuario() + " está accediendo a sus movimientos.\n");
-                        recuperarMovimientos();
+                        texto.append(cliente.getUsuario() + " está accediendo a sus transferencias\n");
+                        recuperarTransferencias();
                         break;
                     case 5:
                         texto.append(cliente.getUsuario() + " está accediendo a crear cuenta nueva\n");
@@ -196,21 +218,29 @@ public class HiloCliente extends Thread{
                     case 6:
                         repetir = false;
                         break;
+                    case 7:
+                        texto.append(cliente.getUsuario() + " está accediendo a sus datos\n");
+                        recuperarDatosCliente();
+                        break;
+                    case 9:
+                        oos.writeObject(cliente.getUsuario()); //Le mandamos el usuario para que lo pueda mostrar al crear una cuenta
+                        break;
                     default:
                         texto.append(cliente.getUsuario() + " ha elegido una opción no valida, no se puede realizar ninguna acción\n");
                 }
             } catch (IOException ignored) {
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                logger.log(Level.WARNING, "No se ha podido realizar el casteo de datos");
+                logger.addHandler(fh);
             }
         }
     }
 
     public void recuperarCuentasCliente() {
         try {
-            //recuperar las cuentas del usuario
+            //recuperar las cuentas del cliente
             List<Cuenta> cuentas = new ArrayList<Cuenta>();
-            String query = "SELECT * FROM cuentas WHERE idusuario = ?";
+            String query = "SELECT * FROM cuentas WHERE idtitular = ?";
             PreparedStatement ps = conexion.prepareStatement(query);
             ps.setInt(1, cliente.getId());
             ResultSet rs = ps.executeQuery();
@@ -230,13 +260,17 @@ public class HiloCliente extends Thread{
             oosbytes.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
+        } catch (IllegalBlockSizeException e) {
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         }
     }
 
@@ -255,11 +289,14 @@ public class HiloCliente extends Thread{
             oos.writeObject(firma);
         } catch (IOException ignored) {
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "El algoritmo usado no es correcto");
+            logger.addHandler(fh);
         } catch (SignatureException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         }
     }
 
@@ -292,15 +329,20 @@ public class HiloCliente extends Thread{
             ps.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
         }
     }
 
@@ -326,7 +368,7 @@ public class HiloCliente extends Thread{
             if (numeroIntento == numero) {
                 oos.writeObject(true);
                 //insertamos los datos
-                String query = "INSERT INTO transferencias(numcuentaremitente, nuncuentadestinatario, concepto, cantidad, fecha) VALUES(?, ?, ?, ?, ?)";
+                String query = "INSERT INTO transferencias(numcuentaremitente, numcuentadestinatario, concepto, cantidad, fecha) VALUES(?, ?, ?, ?, ?)";
                 PreparedStatement ps = conexion.prepareStatement(query);
                 ps.setString(1, transferencia.getRemitente());
                 ps.setString(2, transferencia.getDestinatario());
@@ -336,12 +378,12 @@ public class HiloCliente extends Thread{
                 ps.execute();
                 //actulizamos las cuentas
                 texto.append("Actualizando los saldos de las cuentas debido a la transferencia que ha realizado " + cliente.getUsuario() + "\n");
-                query = "UPDATE cuentas SET saldo = saldo - ?  WHERE numcuenta = ?";
+                query = "UPDATE cuentas SET saldo = saldo - ?  WHERE numerocuenta = ?";
                 ps = conexion.prepareStatement(query);
                 ps.setDouble(1, transferencia.getCantidad());
                 ps.setString(2, transferencia.getRemitente());
                 ps.execute();
-                query = "UPDATE cuentas SET saldo = saldo + ?  WHERE numcuenta = ?";
+                query = "UPDATE cuentas SET saldo = saldo + ?  WHERE numerocuenta = ?";
                 ps = conexion.prepareStatement(query);
                 ps.setDouble(1, transferencia.getCantidad());
                 ps.setString(2, transferencia.getDestinatario());
@@ -354,31 +396,41 @@ public class HiloCliente extends Thread{
             oisbytes.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
         }
     }
 
-    public void recuperarMovimientos() {
+    public void recuperarTransferencias() {
         try {
+            byte[] ncuantaCifrado = (byte[]) ois.readObject();
+            desCipher.init(Cipher.DECRYPT_MODE, key);
+            String ncuenta = new String(desCipher.doFinal(ncuantaCifrado));
             List<Transferencia> movimientos = new ArrayList<>();
-            texto.append(cliente.getUsuario() + " está cargando los movimientos de su cuenta\n");
-            String query = "SELECT * FROM tranferencias WHERE numcuentaremitente IN (SELECT numerocuenta FROM cuentas WHERE id = ?) OR numcuentadestinatario IN (SELECT numerocuenta FROM cuentas WHERE id = ?);";
+            texto.append(cliente.getUsuario() + " está cargando las transferencias de su cuenta\n");
+            System.out.println(ncuenta);
+            String query = "SELECT * FROM transferencias WHERE numcuentaremitente = ? OR numcuentadestinatario = ?";
             PreparedStatement ps = conexion.prepareStatement(query);
-            ps.setInt(1, cliente.getId());
-            ps.setInt(2, cliente.getId());
+            ps.setString(1, ncuenta);
+            ps.setString(2, ncuenta);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Transferencia transferencia = new Transferencia(rs.getString(2), rs.getString(3), rs.getString(5), rs.getDouble(6), rs.getString(4));
+                Transferencia transferencia = new Transferencia(rs.getString(2), rs.getString(3), rs.getString(4), rs.getDouble(5), rs.getString(6));
                 movimientos.add(transferencia);
             }
+            System.out.println(movimientos.size());
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oosbytes = new ObjectOutputStream(bos);
             oosbytes.writeObject(movimientos);
@@ -392,13 +444,57 @@ public class HiloCliente extends Thread{
             oosbytes.close();
         } catch (IOException ignored) {
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
         } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.WARNING, "No se ha podido realizar el casteo de datos");
+            logger.addHandler(fh);
+        }
+    }
+
+    public void recuperarDatosCliente() {
+        try {
+            //recuperar los datos del cliente
+            String query = "SELECT * FROM clientes WHERE id = ?";
+            PreparedStatement ps = conexion.prepareStatement(query);
+            ps.setInt(1, cliente.getId());
+            ResultSet rs = ps.executeQuery();
+            NuevoCliente c = null;
+            while (rs.next()) {
+                c = new NuevoCliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6), rs.getString(7));;
+            }
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oosbytes = new ObjectOutputStream(bos);
+            oosbytes.writeObject(c);
+            oosbytes.flush();
+            byte[] clientebytes = bos.toByteArray();
+            desCipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] clienteCifrado = desCipher.doFinal(clientebytes);
+            oos.writeObject(clienteCifrado);
+            bos.close();
+            oosbytes.close();
+        } catch (IOException ignored) {
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Ha surgido un error al realizar una sentenia SQL");
+            logger.addHandler(fh);
+        } catch (IllegalBlockSizeException e) {
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
+        } catch (BadPaddingException e) {
+            logger.log(Level.WARNING, "Ha surgido un error inesperado");
+            logger.addHandler(fh);
+        } catch (InvalidKeyException e) {
+            logger.log(Level.WARNING, "La clave no es correcta");
+            logger.addHandler(fh);
         }
     }
 }

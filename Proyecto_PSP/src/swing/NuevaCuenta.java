@@ -32,6 +32,16 @@ public class NuevaCuenta extends javax.swing.JPanel {
         this.key = key;
         this.ois = ois;
         this.oos = oos;
+
+        try {
+            oos.writeObject(9);
+            String usuarioCliente = (String) ois.readObject();
+            titular.setText(usuarioCliente);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -72,6 +82,7 @@ public class NuevaCuenta extends javax.swing.JPanel {
 
         titular.setEditable(false);
         titular.setBackground(new java.awt.Color(255, 255, 255));
+        titular.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         titular.setBorder(null);
         add(titular, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 200, 240, -1));
         add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 220, 240, 10));
@@ -167,7 +178,7 @@ public class NuevaCuenta extends javax.swing.JPanel {
             Matcher ncuenta = pattern.matcher(numCuenta.getText());
             if (!numCuenta.getText().isBlank() && ncuenta.find()) {
                 //mandamos la opcion que hemos elegido
-                oos.writeObject(2);
+                oos.writeObject(5);
                 Cipher desCipher = Cipher.getInstance("DES");
                 desCipher.init(Cipher.ENCRYPT_MODE, key);
                 byte[] nencriptado = desCipher.doFinal(numCuenta.getText().getBytes());

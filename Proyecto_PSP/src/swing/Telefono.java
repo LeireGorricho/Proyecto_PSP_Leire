@@ -61,21 +61,21 @@ public class Telefono extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
         codigo = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/telefono.png"))); // NOI18N
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 470, -1));
-
-        codigo.setFont(new java.awt.Font("Helvetica Neue", 1, 36)); // NOI18N
+        codigo.setFont(new java.awt.Font("Helvetica Neue", 1, 48)); // NOI18N
         codigo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         codigo.setText("1234");
-        jPanel1.add(codigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 200, 170, 80));
+        jPanel1.add(codigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(172, 190, 190, 100));
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/telefono.png"))); // NOI18N
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 470, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
