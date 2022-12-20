@@ -38,7 +38,7 @@ public class MisCuentas extends javax.swing.JPanel {
     /**
      * Creates new form MisCuentas
      */
-    public MisCuentas(JPanel panel) {
+    public MisCuentas(JPanel panel, ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
         initComponents();
         this.key = key;
         this.oos = oos;
@@ -181,10 +181,9 @@ public class MisCuentas extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonVerMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonVerMousePressed
-        InfoCuenta frame = new InfoCuenta(panel);
+        InfoCuenta frame = new InfoCuenta(panel, ois, oos, key);
         frame.setSize(560,450);
         frame.setLocation(0,0);
-        
         panel.removeAll();
         panel.add(frame, BorderLayout.CENTER);
         panel.revalidate();

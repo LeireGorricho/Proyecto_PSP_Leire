@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.swing.*;
 
@@ -19,50 +20,28 @@ import javax.swing.*;
  * @author leiii
  */
 public class Login extends javax.swing.JFrame {
-    static JFrame ventana = new Login();
 
-    private static int PUERTO = 4040;
-    private static String HOST = "localhost";
-
-    static ObjectOutputStream oos;
-    static ObjectInputStream ois;
-    static SecretKey key;
+    ObjectOutputStream oos;
+    ObjectInputStream ois;
+    SecretKey key;
+    private Cipher cipher;
 
     /**
      * Creates new form Login
      */
-    public Login() {
+    public Login(ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
         initComponents();
+        this.ois = ois;
+        this.oos = oos;
+        this.key = key;
 
-
-            InicioSesion frame = new InicioSesion(panel_log, ventana, oos, ois, key);
-            frame.setSize(490,450);
-            frame.setLocation(0,0);
-
-            panel_log.removeAll();
-            panel_log.add(frame, BorderLayout.CENTER);
-            panel_log.revalidate();
-            panel_log.repaint();
-
-    }
-
-    public static boolean conectar() {
-        try {
-            Socket socket = new Socket(HOST, PUERTO);
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
-            key = (SecretKey) ois.readObject();
-        } catch (UnknownHostException e) {
-            JOptionPane.showMessageDialog(null, "No se ha podido establecer la conexión con el host");
-            return false;
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Ha surgido un error al intentar conectarse con el servidor");
-            return false;
-        } catch (ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "No se ha podido cargar la ventana de inicio de sesión");
-            return false;
-        }
-        return true;
+        InicioSesion frame = new InicioSesion(panel_log, oos, ois, key);
+        frame.setSize(490,450);
+        frame.setLocation(0,0);
+        panel_log.removeAll();
+        panel_log.add(frame, BorderLayout.CENTER);
+        panel_log.revalidate();
+        panel_log.repaint();
     }
 
     /**
@@ -190,11 +169,20 @@ public class Login extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                if (conectar()) {
-                    ventana.setVisible(true);
-                } else {
-                    ventana.setDefaultCloseOperation(EXIT_ON_CLOSE);
-                    ventana.dispose();
+                try {
+                    int PUERTO = 4040;
+                    String HOST = "localhost";
+                    Socket socket = new Socket(HOST, PUERTO);
+                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                    SecretKey key = (SecretKey) ois.readObject();
+                    new Login(ois, oos, key).setVisible(true);
+                } catch (UnknownHostException e) {
+                    JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado");
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Ha surgido un error al intentar conectarse con el servidor");
+                } catch (ClassNotFoundException e) {
+                    JOptionPane.showMessageDialog(null, "No se ha podido cargar la ventana de inicio de sesión");
                 }
             }
         });

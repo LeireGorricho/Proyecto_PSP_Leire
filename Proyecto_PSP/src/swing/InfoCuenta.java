@@ -6,12 +6,20 @@ package swing;
 
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import javax.crypto.*;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
+import clases.Transferencia;
 import scrollbar.ScrollBarCustom;
 import table.TableHeader;
 
@@ -20,16 +28,21 @@ import table.TableHeader;
  * @author leiii
  */
 public class InfoCuenta extends javax.swing.JPanel {
-    String[] nombreColumnas = {"Usuario", "Cantidad", "Destinatario", "Fecha"};
-    JPanel pane;
+    String[] nombreColumnas = {"Remitente", "Destinatario", "Cantidad", "Fecha", "Concepto"};
+    JPanel panel;
+    private SecretKey key;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
     
     /**
      * Creates new form InfoCuenta
      */
-    public InfoCuenta(JPanel pane) {
+    public InfoCuenta(JPanel panel, ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
         initComponents();
-        
-        this.pane = pane;
+        this.key = key;
+        this.oos = oos;
+        this.ois = ois;
+        this.panel = panel;
         
         tablaTransferencias.setShowHorizontalLines(true);
         tablaTransferencias.setGridColor(new Color(230,230,230));
@@ -60,7 +73,40 @@ public class InfoCuenta extends javax.swing.JPanel {
     }
     
     public void cargarDatos(){
-        
+        try {
+            //mandamos la opcion que hemos escogido
+            oos.writeObject(4);
+            Cipher desCipher = Cipher.getInstance("DES");
+            desCipher.init(Cipher.DECRYPT_MODE, key);
+            //recuperamos la lista de movimientos
+            byte[] movimientosCifradas = (byte[]) ois.readObject();
+            byte[] movimientosBytes = desCipher.doFinal(movimientosCifradas);
+            ByteArrayInputStream bis = new ByteArrayInputStream(movimientosBytes);
+            ObjectInputStream oisbytes = new ObjectInputStream(bis);
+            List<Transferencia> transferencias = (List<Transferencia>) oisbytes.readObject();
+            bis.close();
+            oisbytes.close();
+            //cargamos los datos en la tabla
+            int cantidad = transferencias.size();
+            String[][] d = new String[cantidad][5];
+            for (int i = 0; i < transferencias.size(); i++) {
+                d[i][0] = String.valueOf(transferencias.get(i).getRemitente());
+                d[i][1] = String.valueOf(transferencias.get(i).getDestinatario());
+                d[i][2] = String.valueOf(transferencias.get(i).getCantidad());
+                d[i][3] = String.valueOf(transferencias.get(i).getFecha());
+                d[i][4] = String.valueOf(transferencias.get(i).getConcepto());
+            }
+            tablaTransferencias.setModel(new DefaultTableModel(d, nombreColumnas));
+        } catch (IOException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+            JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado¡");
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            JOptionPane.showMessageDialog(null, "No se ha especficado el algoritmo");
+        } catch (InvalidKeyException e) {
+            JOptionPane.showMessageDialog(null, "La llave no es correcta");
+        } catch (ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "No se han podido cargar los datos");
+        }
     }
     
     /**

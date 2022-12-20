@@ -215,8 +215,8 @@ public class NuevaTransferencia extends javax.swing.JPanel {
             double numCantidad = Double.parseDouble(cantidad.getText());
             if (!concepto.getText().isBlank() && !cantidad.getText().isBlank()) {
                 Pattern pattern  = Pattern.compile("^([A-Za-z]{2}[0-9]{2} [0-9]{4} [0-9]{2} [0-9]{10})$");
-                Matcher matcher = pattern.matcher(cuentaDestinataria.getText());
-                if (matcher.find()) {
+                // Matcher matcher = pattern.matcher(cuentaDestinataria.getText());
+                /*if (matcher.find()) {
                     //mandamos la opcion seleccionada
                     oos.writeObject(5);
                     String ncuentaremitente = cuentaRemitente.getSelectedItem().toString();
@@ -233,27 +233,27 @@ public class NuevaTransferencia extends javax.swing.JPanel {
                     byte[] transferenciaCifrado = desCipher.doFinal(transferenciabytes);
                     //enviamos objeto cifrado
                     oos.writeObject(transferenciaCifrado);
-                    PanelCodigo frame = new PanelCodigo(ois, oos, key, content);
+                    CodigoSeguridad frame = new CodigoSeguridad(panel, ois, oos, key);
                     frame.setSize(830, 550);
                     frame.setLocation(0, 0);
-                    content.removeAll();
-                    content.add(frame, BorderLayout.CENTER);
-                    content.revalidate();
-                    content.repaint();
-                    JFrame movil = new VentanaMobil(ois, oos, key);
-                    movil.setVisible(true);
+                    panel.removeAll();
+                    panel.add(frame, BorderLayout.CENTER);
+                    panel.revalidate();
+                    panel.repaint();
+                    JFrame telefono = new Telefono(ois, oos, key);
+                    telefono.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "La cuenta esta mal escrita ej. AA00 0000 00 0000000000");
-                }
+                }*/
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(null, "La cantidad esta mal escrita comprueba que es un valor numerico.");
-        } catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException ex) {
+        /*} catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException ex) {
             JOptionPane.showMessageDialog(null, "ERROR inesperado.");
         } catch (NoSuchAlgorithmException ex) {
             JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo.");
         } catch (InvalidKeyException ex) {
-            JOptionPane.showMessageDialog(null, "La llave no es la correcta.");
+            JOptionPane.showMessageDialog(null, "La llave no es la correcta.");*/
         }
     }//GEN-LAST:event_botonRealizarTransferenciaMousePressed
 

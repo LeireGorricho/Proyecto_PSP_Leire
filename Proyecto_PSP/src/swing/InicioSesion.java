@@ -4,12 +4,15 @@
  */
 package swing;
 
+import clases.Cliente;
+
 import java.awt.BorderLayout;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import javax.crypto.SecretKey;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.*;
+import javax.swing.*;
 
 /**
  *
@@ -17,23 +20,20 @@ import javax.swing.JPanel;
  */
 public class InicioSesion extends javax.swing.JPanel {
     JPanel pane;
-    static JFrame ventana = new Login();
-
+    private Cipher cipher;
     ObjectOutputStream oos;
     ObjectInputStream ois;
     SecretKey key;
+
     /**
      * Creates new form InicioSesion
      */
-    public InicioSesion(JPanel pane, JFrame ventana, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
+    public InicioSesion(JPanel pane, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
-        
-        this.pane = pane;
-        this.ventana = ventana;
-
         this.oos = oos;
         this.ois = ois;
         this.key = key;
+        this.pane = pane;
     }
 
     /**
@@ -141,7 +141,7 @@ public class InicioSesion extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonRegistrarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarMousePressed
-        RegistrarUsuario frame = new RegistrarUsuario(pane, ventana, oos, ois, key);
+        RegistrarUsuario frame = new RegistrarUsuario(pane, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         
@@ -152,10 +152,59 @@ public class InicioSesion extends javax.swing.JPanel {
     }//GEN-LAST:event_botonRegistrarMousePressed
 
     private void botonIniciarSesionMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonIniciarSesionMousePressed
-
-        new VentanaPrincipal().setVisible(true);
-        
-        ventana.dispose();
+        //comprovamos que los campos tienen datos
+        if (!usuario.getText().isBlank() && !contrasena.getText().isBlank()) {
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutputStream oosbytes = new ObjectOutputStream(bos);
+                oos.writeObject(1);
+                //hasheamos la contraseña
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                byte[] contrasenaBytes = contrasena.getText().getBytes();
+                md.update(contrasenaBytes);
+                byte[] resumen = md.digest();
+                String hashContrasena = new String(resumen);
+                //creamos un objeto con todos los datos del inicio de sesion
+                Cliente cliente = new Cliente(usuario.getText(), hashContrasena);
+                //lo comvertimos a bytes
+                oosbytes.writeObject(usuario);
+                oosbytes.flush();
+                byte[] userbytes = bos.toByteArray();
+                //recogemos la clave
+                cipher = Cipher.getInstance("DES");
+                //configuramos modo encriptar
+                cipher.init(Cipher.ENCRYPT_MODE, key);
+                byte[] userCifrado = cipher.doFinal(userbytes);
+                //enviamos objeto cifrado
+                oos.writeObject(userCifrado);
+                //recogemos login
+                cipher.init(Cipher.DECRYPT_MODE, key);
+                userCifrado = (byte[]) ois.readObject();
+                userbytes = cipher.doFinal(userCifrado);
+                ByteArrayInputStream bis = new ByteArrayInputStream(userbytes);
+                ObjectInputStream oisbytes = new ObjectInputStream(bis);
+                cliente = (Cliente) oisbytes.readObject();
+                bis.close();
+                oisbytes.close();
+                if (cliente.isAcierto()) {
+                    new VentanaPrincipal(ois, oos, key).setVisible(true);
+                    new Login(ois, oos, key).dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
+                }
+            } catch (IOException | ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(null, "Ha surgido un error con el servidor");
+                ex.printStackTrace();
+            } catch (NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException ex) {
+                JOptionPane.showMessageDialog(null, "Ha surgido un error inesperado");
+            } catch (NoSuchAlgorithmException ex) {
+                JOptionPane.showMessageDialog(null, "No se ha especificado el algoritmo de encriptacion");
+            } catch (InvalidKeyException ex) {
+                JOptionPane.showMessageDialog(null, "La llave no es correcta");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "ERROR tienes que rellenar todos los campos.");
+        }
     }//GEN-LAST:event_botonIniciarSesionMousePressed
 
 

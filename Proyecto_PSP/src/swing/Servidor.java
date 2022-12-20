@@ -69,8 +69,11 @@ public class Servidor extends javax.swing.JFrame {
         jLabel1.setText("SERVIDOR");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(136, 32, -1, -1));
 
+        textareaServidor.setEditable(false);
+        textareaServidor.setBackground(new java.awt.Color(255, 255, 255));
         textareaServidor.setColumns(20);
         textareaServidor.setRows(5);
+        textareaServidor.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jScrollPane1.setViewportView(textareaServidor);
 
         jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 340, 410));
@@ -82,6 +85,7 @@ public class Servidor extends javax.swing.JFrame {
             }
         });
 
+        jLabel2.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Detener servidor");
@@ -100,7 +104,7 @@ public class Servidor extends javax.swing.JFrame {
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
-        jPanel1.add(botonDetener, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 540, 120, 30));
+        jPanel1.add(botonDetener, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 530, 120, 30));
 
         botonIniciar.setBackground(new java.awt.Color(153, 0, 102));
         botonIniciar.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -109,6 +113,7 @@ public class Servidor extends javax.swing.JFrame {
             }
         });
 
+        jLabel3.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Iniciar Servidor");
 
@@ -119,7 +124,7 @@ public class Servidor extends javax.swing.JFrame {
             .addGroup(botonIniciarLayout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addComponent(jLabel3)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
         botonIniciarLayout.setVerticalGroup(
             botonIniciarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -129,7 +134,7 @@ public class Servidor extends javax.swing.JFrame {
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
-        jPanel1.add(botonIniciar, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 540, 120, 30));
+        jPanel1.add(botonIniciar, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 530, 120, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -149,7 +154,7 @@ public class Servidor extends javax.swing.JFrame {
         try {
             //iniciamos el servicio de escucha del servidor
             servidor = new ServerSocket(4040);
-            textareaServidor.append("--Servidor Iniciado--");
+            textareaServidor.append("--Servidor Iniciado--\n");
             HiloServidor hilo = new HiloServidor(servidor, textareaServidor, activo);
             hilo.start();
         } catch (IOException ex) {
@@ -159,7 +164,8 @@ public class Servidor extends javax.swing.JFrame {
 
     private void botonDetenerMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonDetenerMousePressed
         activo = false;
-        textareaServidor.append("--Servidor Detenido--");
+        textareaServidor.append("--Servidor Detenido--\n");
+        dispose();
     }//GEN-LAST:event_botonDetenerMousePressed
 
     /**

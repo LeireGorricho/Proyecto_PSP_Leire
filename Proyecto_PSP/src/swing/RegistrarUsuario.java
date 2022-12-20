@@ -22,9 +22,8 @@ import javax.swing.*;
  * @author leiii
  */
 public class RegistrarUsuario extends javax.swing.JPanel {
-    JPanel pane;
-    static JFrame ventana = new Login();
-
+    
+    JPanel panel;
     ObjectOutputStream oos;
     ObjectInputStream ois;
     SecretKey key;
@@ -32,13 +31,12 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     /**
      * Creates new form RegistrarUsuario
      */
-    public RegistrarUsuario(JPanel pane, JFrame ventana, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
+    public RegistrarUsuario(JPanel panel, ObjectOutputStream oos, ObjectInputStream ois, SecretKey key) {
         initComponents();
         this.oos = oos;
         this.ois = ois;
         this.key = key;
-        this.pane = pane;
-        this.ventana = ventana;
+        this.panel = panel;
 
         try {
             oos.writeObject(3);
@@ -101,6 +99,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
         jLabel11 = new javax.swing.JLabel();
         contrasenaRepetida = new javax.swing.JTextField();
         jSeparator8 = new javax.swing.JSeparator();
+        terminos = new javax.swing.JCheckBox();
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -108,14 +107,14 @@ public class RegistrarUsuario extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(102, 102, 102));
         jLabel1.setText("REGISTRO");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, -1, -1));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         jLabel2.setText("Apellido:");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, -1, -1));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, -1, -1));
 
         apellido.setBorder(null);
-        jPanel1.add(apellido, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 120, 240, -1));
-        jPanel1.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 140, 240, 10));
+        jPanel1.add(apellido, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 110, 240, -1));
+        jPanel1.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 130, 240, 10));
 
         botonCancelar.setBackground(new java.awt.Color(153, 0, 102));
         botonCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -145,7 +144,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1.add(botonCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 380, 120, 30));
+        jPanel1.add(botonCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 390, 120, 30));
 
         botonRegistrarse.setBackground(new java.awt.Color(153, 0, 102));
         botonRegistrarse.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -175,49 +174,52 @@ public class RegistrarUsuario extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1.add(botonRegistrarse, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 380, 120, 30));
-        jPanel1.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 180, 240, 10));
+        jPanel1.add(botonRegistrarse, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 390, 120, 30));
+        jPanel1.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 170, 240, 10));
 
         edad.setBorder(null);
-        jPanel1.add(edad, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, 240, -1));
+        jPanel1.add(edad, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 150, 240, -1));
 
         jLabel6.setText("Edad:");
-        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, -1, -1));
-        jPanel1.add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 220, 240, 10));
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, -1, -1));
+        jPanel1.add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 240, 10));
 
         email.setBorder(null);
-        jPanel1.add(email, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 240, -1));
+        jPanel1.add(email, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 190, 240, -1));
 
         jLabel7.setText("Email:");
-        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, -1, -1));
-        jPanel1.add(jSeparator5, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 260, 240, 10));
+        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 190, -1, -1));
+        jPanel1.add(jSeparator5, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 250, 240, 10));
 
         usuario.setBorder(null);
-        jPanel1.add(usuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 240, 240, -1));
+        jPanel1.add(usuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 230, 240, -1));
 
         jLabel8.setText("Usuario:");
-        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, -1, -1));
-        jPanel1.add(jSeparator6, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 300, 240, 10));
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 230, -1, -1));
+        jPanel1.add(jSeparator6, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 290, 240, 10));
 
         contrasena.setBorder(null);
-        jPanel1.add(contrasena, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 280, 240, -1));
+        jPanel1.add(contrasena, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 270, 240, -1));
 
         jLabel9.setText("Contraseña:");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 280, -1, -1));
-        jPanel1.add(jSeparator7, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 100, 240, 10));
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 270, -1, -1));
+        jPanel1.add(jSeparator7, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 90, 240, 10));
 
         nombre.setBorder(null);
-        jPanel1.add(nombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 80, 240, -1));
+        jPanel1.add(nombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 70, 240, -1));
 
         jLabel10.setText("Nombre:");
-        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, -1, -1));
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
 
         jLabel11.setText("Repetir contraseña:");
-        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 320, -1, -1));
+        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 310, -1, -1));
 
         contrasenaRepetida.setBorder(null);
-        jPanel1.add(contrasenaRepetida, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 320, 240, -1));
-        jPanel1.add(jSeparator8, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 340, 240, 10));
+        jPanel1.add(contrasenaRepetida, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 310, 240, -1));
+        jPanel1.add(jSeparator8, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 330, 240, 10));
+
+        terminos.setText("Acepto los terminos y condiciones");
+        jPanel1.add(terminos, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 350, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -232,19 +234,19 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonCancelarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonCancelarMousePressed
-        InicioSesion frame = new InicioSesion(pane, ventana, oos, ois, key);
+        InicioSesion frame = new InicioSesion(panel, oos, ois, key);
         frame.setSize(490,450);
         frame.setLocation(0,0);
         
-        pane.removeAll();
-        pane.add(frame, BorderLayout.CENTER);
-        pane.revalidate();
-        pane.repaint();
+        panel.removeAll();
+        panel.add(frame, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
     }//GEN-LAST:event_botonCancelarMousePressed
 
     private void botonRegistrarseMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegistrarseMousePressed
         //comrovamos que ha acceptado los terminos con firma digital
-        if (checkTerminos.isSelected() && check) {
+        if (terminos.isSelected() && check) {
             try {
                 //creamos pattern para que escriba la primera letra de el nombre y apellido en mayus
                 int numEdad = Integer.parseInt(edad.getText());
@@ -281,14 +283,14 @@ public class RegistrarUsuario extends javax.swing.JPanel {
                                 oos.writeObject(registrarseCifrado);
                                 JOptionPane.showMessageDialog(null, "Se ha registrado el nuevo cliente");
                                 //Vamos al panel de inicio de sesion
-                                InicioSesion frame = new InicioSesion(pane, ventana, oos, ois, key);
+                                InicioSesion frame = new InicioSesion(panel, oos, ois, key);
                                 frame.setSize(490,450);
                                 frame.setLocation(0,0);
 
-                                pane.removeAll();
-                                pane.add(frame, BorderLayout.CENTER);
-                                pane.revalidate();
-                                pane.repaint();
+                                panel.removeAll();
+                                panel.add(frame, BorderLayout.CENTER);
+                                panel.revalidate();
+                                panel.repaint();
                             } else {
                                 JOptionPane.showMessageDialog(null, "La edad puede ser de 3 dígitos como mucho");
                             }
@@ -343,6 +345,7 @@ public class RegistrarUsuario extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator7;
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JTextField nombre;
+    private javax.swing.JCheckBox terminos;
     private javax.swing.JTextField usuario;
     // End of variables declaration//GEN-END:variables
 }

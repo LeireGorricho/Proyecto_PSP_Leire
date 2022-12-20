@@ -6,8 +6,12 @@ package swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.HeadlessException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import javax.crypto.SecretKey;
+import javax.swing.*;
 
 /**
  *
@@ -15,16 +19,23 @@ import javax.swing.JPanel;
  */
 public class VentanaPrincipal extends javax.swing.JFrame {
 
+    static private ObjectInputStream ois;
+    static private ObjectOutputStream oos;
+    static private SecretKey key;
+    JFrame ventana = new VentanaPrincipal(ois, oos, key);
+    
     /**
      * Creates new form VentanaPrincipal
      */
-    public VentanaPrincipal() {
+    public VentanaPrincipal(ObjectInputStream ois, ObjectOutputStream oos, SecretKey key) {
         initComponents();
+        this.ois = ois;
+        this.oos = oos;
+        this.key = key;
         
-        MisCuentas frame = new MisCuentas(panelCuenta);
+        MisCuentas frame = new MisCuentas(panelCuenta, ois, oos, key);
         frame.setSize(560,450);
         frame.setLocation(0,0);
-        
         panelCuenta.removeAll();
         panelCuenta.add(frame, BorderLayout.CENTER);
         panelCuenta.revalidate();
@@ -277,7 +288,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
         
-        MisCuentas frame = new MisCuentas(panelCuenta);
+        MisCuentas frame = new MisCuentas(panelCuenta, ois, oos, key);
         frame.setSize(560,450);
         frame.setLocation(0,0);
         
@@ -295,7 +306,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
         
-        NuevaTransferencia frame = new NuevaTransferencia();
+        NuevaTransferencia frame = new NuevaTransferencia(panelCuenta, key, ois, oos);
         frame.setSize(560,450);
         frame.setLocation(0,0);
         
@@ -312,6 +323,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         devolverColor(botonCrearCuenta, bordeCrearCuenta, labelCrearCuenta);
         
+        new Login(ois, oos, key).setVisible(true);           
+        ventana.dispose();
     }//GEN-LAST:event_botonCerrarSesionMousePressed
 
     private void botonMisDatosMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonMisDatosMousePressed
@@ -338,7 +351,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         devolverColor(botonCerrarSesion, bordeCerrarSesion, labelCerrarSesion);
         devolverColor(botonMisDatos, bordeMisDatos, labelMisDatos);
         
-        NuevaCuenta frame = new NuevaCuenta();
+        NuevaCuenta frame = new NuevaCuenta(key, ois, oos);
         frame.setSize(560,450);
         frame.setLocation(0,0);
         
@@ -378,7 +391,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new VentanaPrincipal().setVisible(true);
+                new VentanaPrincipal(ois, oos, key).setVisible(true);
             }
         });
     }
